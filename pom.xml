@@ -23,6 +23,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.6.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>aspose-pdf</artifactId>
             <version>21.3</version>
