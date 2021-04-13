@@ -45,7 +45,7 @@ public class PDFMerger implements Callable<Integer> {
     static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d-MM-yy");
 
     @Override
-    public Integer call() throws Exception { // your business logic goes here...
+    public Integer call() throws Exception {
         List<InputStream> files;
         String mergePDFName = file.getAbsolutePath() + "/merged_files.pdf";
         String excelFileName = file.getAbsolutePath() + "/merged_excel" + "_" + System.currentTimeMillis() + ".xlsx";
