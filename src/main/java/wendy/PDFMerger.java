@@ -204,8 +204,10 @@ public class PDFMerger implements Callable<Integer> {
                     cellFactuurDatum.setCellType(CellType.STRING);
                     cellFactuurDatum.setCellValue(factuurDatum);
 
-                    if (!factuurnummer.trim().equals("")) {
-                        factuurnummer = scnWord.next();
+                    if (!factuurDatum.trim().equals("")) {
+                        if (scnWord.hasNext()) {
+                            factuurnummer = scnWord.next();
+                        }
                     }
 
                     XSSFCell cellFacturNummer = row.createCell(FACTUUR_NUMMER.getCell());
