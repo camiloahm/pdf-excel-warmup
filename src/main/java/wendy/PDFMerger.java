@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -75,7 +76,7 @@ public class PDFMerger implements Callable<Integer> {
             XSSFRow rowHeaders = sheet.createRow(0);
 
             for (SheetTemplate column : SheetTemplate.values()) {
-                rowHeaders.createCell(column.getCell()).setCellValue(column.getName());
+                rowHeaders.createCell(column.getCell()).setCellValue(column.getName().toUpperCase());
             }
 
             for (int i = 0; i < SheetTemplate.values().length; i++) {
@@ -88,7 +89,7 @@ public class PDFMerger implements Callable<Integer> {
                 line = scnLine.nextLine();
                 Scanner scnWord = new Scanner(line);
 
-                if (line.contains(NAAM.getName())) {
+                if (line.toUpperCase().contains(NAAM.getName().toUpperCase())) {
                     scnWord.next();
                     String name = "";
                     while (scnWord.hasNext()) {
@@ -100,12 +101,13 @@ public class PDFMerger implements Callable<Integer> {
                     continue;
                 }
 
-                if (line.contains(TOTAL_INCL_BTW.getName())) {
+                if (line.toUpperCase().contains(TOTAL_INCL_BTW.getName().toUpperCase())) {
                     scnWord.next();
                     scnWord.next();
                     scnWord.next();
                     if (scnWord.hasNext()) {
-                        String totalInclBTW = scnWord.next().replace("€", "");
+                        String totalInclBTW = scnWord.next();
+                        totalInclBTW = totalInclBTW.contains("€") ? totalInclBTW.replace("€", "") : totalInclBTW;
                         XSSFCell cell = row.createCell(TOTAL_INCL_BTW.getCell());
                         cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(totalInclBTW);
@@ -113,13 +115,14 @@ public class PDFMerger implements Callable<Integer> {
                     continue;
                 }
 
-                if (line.contains(BTW_21.getName())) {
+                if (line.toUpperCase().contains(BTW_21.getName().toUpperCase())) {
                     scnWord.next();
                     scnWord.next();
                     scnWord.next();
                     if (scnWord.hasNext()) {
                         scnWord.next();
-                        String btw = scnWord.next().replace("€", "");
+                        String btw = scnWord.next();
+                        btw = btw.contains("€") ? btw.replace("€", "") : btw;
                         XSSFCell cell = row.createCell(BTW_21.getCell());
                         cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(btw);
@@ -127,13 +130,14 @@ public class PDFMerger implements Callable<Integer> {
                     continue;
                 }
 
-                if (line.contains(BTW_9.getName())) {
+                if (line.toUpperCase().contains(BTW_9.getName().toUpperCase())) {
                     scnWord.next();
                     scnWord.next();
                     scnWord.next();
                     if (scnWord.hasNext()) {
                         scnWord.next();
-                        String btw = scnWord.next().replace("€", "");
+                        String btw = scnWord.next();
+                        btw = btw.contains("€") ? btw.replace("€", "") : btw;
                         XSSFCell cell = row.createCell(BTW_9.getCell());
                         cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(btw);
@@ -141,12 +145,13 @@ public class PDFMerger implements Callable<Integer> {
                     continue;
                 }
 
-                if (line.contains(TOTAAL_BTW.getName())) {
+                if (line.toUpperCase().contains(TOTAAL_BTW.getName().toUpperCase())) {
                     scnWord.next();
                     scnWord.next();
                     if (scnWord.hasNext()) {
                         scnWord.next();
-                        String totalBtw = scnWord.next().replace("€", "");
+                        String totalBtw = scnWord.next();
+                        totalBtw = totalBtw.contains("€") ? totalBtw.replace("€", "") : totalBtw;
                         XSSFCell cell = row.createCell(TOTAAL_BTW.getCell());
                         cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(totalBtw);
@@ -155,11 +160,11 @@ public class PDFMerger implements Callable<Integer> {
                     continue;
                 }
 
-                if (line.contains(VERZENDKOSTEN.getName())) {
+                if (line.toUpperCase().contains(VERZENDKOSTEN.getName().toUpperCase())) {
                     scnWord.next();
                     if (scnWord.hasNext()) {
-                        scnWord.next();
-                        String verzendkosten = scnWord.next().replace("€", "");
+                        String verzendkosten = scnWord.next();
+                        verzendkosten = verzendkosten.contains("€") ? verzendkosten.replace("€", "") : verzendkosten;
                         XSSFCell cell = row.createCell(SheetTemplate.VERZENDKOSTEN.getCell());
                         cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(verzendkosten);
@@ -167,24 +172,30 @@ public class PDFMerger implements Callable<Integer> {
                     continue;
                 }
 
-                if (line.contains(TE_BETALEN.getName())) {
+                if (line.toUpperCase().contains(TE_BETALEN.getName().toUpperCase())) {
                     scnWord.next();
                     scnWord.next();
-                    String teBetalen = scnWord.next().replace("€", "");
+                    String teBetalen = scnWord.next();
+                    teBetalen = teBetalen.contains("€") ? teBetalen.replace("€", "") : teBetalen;
                     XSSFCell cell = row.createCell(SheetTemplate.TE_BETALEN.getCell());
                     cell.setCellType(CellType.NUMERIC);
                     cell.setCellValue(teBetalen);
                     continue;
                 }
 
-                if (line.contains(FACTUUR_DATUM.getName())) {
+                if (line.toUpperCase().contains(FACTUUR_DATUM.getName().toUpperCase())) {
                     line = scnLine.nextLine();
                     scnWord = new Scanner(line);
                     String factuurDatum = scnWord.next();
-                    LocalDate localDate = LocalDate.parse(factuurDatum, dateFormatter);
+                    try {
+                        LocalDate localDate = LocalDate.parse(factuurDatum, dateFormatter);
+                        factuurDatum = localDate.toString();
+                    } catch (Exception e) {
+                        factuurDatum = "";
+                    }
                     XSSFCell cellFactuurDatum = row.createCell(FACTUUR_DATUM.getCell());
                     cellFactuurDatum.setCellType(CellType.STRING);
-                    cellFactuurDatum.setCellValue(localDate.toString());
+                    cellFactuurDatum.setCellValue(factuurDatum);
 
                     String factuurnummer = scnWord.next();
                     XSSFCell cellFacturNummer = row.createCell(FACTUUR_NUMMER.getCell());
