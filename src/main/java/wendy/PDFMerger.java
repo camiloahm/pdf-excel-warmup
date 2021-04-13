@@ -186,12 +186,14 @@ public class PDFMerger implements Callable<Integer> {
                 if (line.toUpperCase().contains(FACTUUR_DATUM.getName().toUpperCase())) {
                     line = scnLine.nextLine();
                     scnWord = new Scanner(line);
-                    String factuurDatum = scnWord.next();
-                    try {
-                        LocalDate localDate = LocalDate.parse(factuurDatum, dateFormatter);
-                        factuurDatum = localDate.toString();
-                    } catch (Exception e) {
-                        factuurDatum = "";
+                    String factuurDatum = "";
+                    if (scnWord.hasNext()) {
+                        factuurDatum = scnWord.next();
+                        try {
+                            LocalDate localDate = LocalDate.parse(factuurDatum, dateFormatter);
+                            factuurDatum = localDate.toString();
+                        } catch (Exception e) {
+                        }
                     }
                     XSSFCell cellFactuurDatum = row.createCell(FACTUUR_DATUM.getCell());
                     cellFactuurDatum.setCellType(CellType.STRING);
