@@ -174,11 +174,13 @@ public class PDFMerger implements Callable<Integer> {
                 if (line.toUpperCase().contains(TE_BETALEN.getName().toUpperCase())) {
                     scnWord.next();
                     scnWord.next();
-                    String teBetalen = scnWord.next();
-                    teBetalen = teBetalen.contains("€") ? teBetalen.replace("€", "") : teBetalen;
-                    XSSFCell cell = row.createCell(SheetTemplate.TE_BETALEN.getCell());
-                    cell.setCellType(CellType.NUMERIC);
-                    cell.setCellValue(teBetalen);
+                    if (scnWord.hasNext()) {
+                        String teBetalen = scnWord.next();
+                        teBetalen = teBetalen.contains("€") ? teBetalen.replace("€", "") : teBetalen;
+                        XSSFCell cell = row.createCell(SheetTemplate.TE_BETALEN.getCell());
+                        cell.setCellType(CellType.NUMERIC);
+                        cell.setCellValue(teBetalen);
+                    }
                     continue;
                 }
 
