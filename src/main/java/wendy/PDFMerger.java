@@ -21,6 +21,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +48,7 @@ public class PDFMerger implements Callable<Integer> {
     public Integer call() throws Exception { // your business logic goes here...
         List<InputStream> files;
         String mergePDFName = file.getAbsolutePath() + "/merged_files.pdf";
-        String excelFileName = file.getAbsolutePath() + "/merged_excel.xlsx";
+        String excelFileName = file.getAbsolutePath() + "/merged_excel" + "_" + System.currentTimeMillis() + ".xlsx";
         mergePDFs(mergePDFName);
         generateExcel(mergePDFName, excelFileName);
         return 0;
@@ -60,7 +61,6 @@ public class PDFMerger implements Callable<Integer> {
             String sheetName = "Wendy";
             XSSFWorkbook wb = new XSSFWorkbook();
             XSSFSheet sheet = wb.createSheet(sheetName);
-            XSSFCell cell;
             int rowPosition = 1;
 
             PDFTextStripperByArea stripper = new PDFTextStripperByArea();
@@ -82,20 +82,98 @@ public class PDFMerger implements Callable<Integer> {
                 sheet.setColumnWidth(i, sheet.getColumnWidth(i) * 17 / 10);
             }
 
+            XSSFRow row = sheet.createRow(rowPosition);
             while (scnLine.hasNextLine()) {
                 line = scnLine.nextLine();
                 Scanner scnWord = new Scanner(line);
 
-                XSSFRow row = sheet.createRow(rowPosition);
                 if (line.contains(NAAM.getName())) {
-//                    scnWord.next();
+                    scnWord.next();
                     String name = "";
-//                    while (scnWord.hasNext()) {
-//                        name += scnWord.next() + " ";
-//                    }
-                    cell = row.createCell(NAAM.getCell());
+                    while (scnWord.hasNext()) {
+                        name += scnWord.next() + " ";
+                    }
+                    XSSFCell cell = row.createCell(NAAM.getCell());
                     cell.setCellType(CellType.STRING);
-                    cell.setCellValue("Camilo");
+                    cell.setCellValue(name);
+                    continue;
+                }
+
+                if (line.contains(TOTAL_INCL_BTW.getName())) {
+                    scnWord.next();
+                    scnWord.next();
+                    scnWord.next();
+                    if (scnWord.hasNext()) {
+                        String totalInclBTW = scnWord.next().replace("€", "");
+                        XSSFCell cell = row.createCell(TOTAL_INCL_BTW.getCell());
+                        cell.setCellType(CellType.NUMERIC);
+                        cell.setCellValue(totalInclBTW);
+                    }
+                    continue;
+                }
+
+                if (line.contains(BTW_21.getName())) {
+                    scnWord.next();
+                    scnWord.next();
+                    scnWord.next();
+                    if (scnWord.hasNext()) {
+                        scnWord.next();
+                        String btw = scnWord.next().replace("€", "");
+                        XSSFCell cell = row.createCell(BTW_21.getCell());
+                        cell.setCellType(CellType.NUMERIC);
+                        cell.setCellValue(btw);
+                    }
+                    continue;
+                }
+
+                if (line.contains(BTW_9.getName())) {
+                    scnWord.next();
+                    scnWord.next();
+                    scnWord.next();
+                    if (scnWord.hasNext()) {
+                        scnWord.next();
+                        String btw = scnWord.next().replace("€", "");
+                        XSSFCell cell = row.createCell(BTW_9.getCell());
+                        cell.setCellType(CellType.NUMERIC);
+                        cell.setCellValue(btw);
+                    }
+                    continue;
+                }
+
+                if (line.contains(TOTAAL_BTW.getName())) {
+                    scnWord.next();
+                    scnWord.next();
+                    if (scnWord.hasNext()) {
+                        scnWord.next();
+                        String totalBtw = scnWord.next().replace("€", "");
+                        XSSFCell cell = row.createCell(TOTAAL_BTW.getCell());
+                        cell.setCellType(CellType.NUMERIC);
+                        cell.setCellValue(totalBtw);
+
+                    }
+                    continue;
+                }
+
+                if (line.contains(VERZENDKOSTEN.getName())) {
+                    scnWord.next();
+                    if (scnWord.hasNext()) {
+                        scnWord.next();
+                        String verzendkosten = scnWord.next().replace("€", "");
+                        XSSFCell cell = row.createCell(SheetTemplate.VERZENDKOSTEN.getCell());
+                        cell.setCellType(CellType.NUMERIC);
+                        cell.setCellValue(verzendkosten);
+                    }
+                    continue;
+                }
+
+                if (line.contains(TE_BETALEN.getName())) {
+                    scnWord.next();
+                    scnWord.next();
+                    String teBetalen = scnWord.next().replace("€", "");
+                    XSSFCell cell = row.createCell(SheetTemplate.TE_BETALEN.getCell());
+                    cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue(teBetalen);
+                    continue;
                 }
 
                 if (line.contains(FACTUUR_DATUM.getName())) {
@@ -103,19 +181,22 @@ public class PDFMerger implements Callable<Integer> {
                     scnWord = new Scanner(line);
                     String factuurDatum = scnWord.next();
                     LocalDate localDate = LocalDate.parse(factuurDatum, dateFormatter);
-                    cell = row.createCell(FACTUUR_DATUM.getCell());
-                    cell.setCellType(CellType.STRING);
-                    cell.setCellValue(localDate.toString());
+                    XSSFCell cellFactuurDatum = row.createCell(FACTUUR_DATUM.getCell());
+                    cellFactuurDatum.setCellType(CellType.STRING);
+                    cellFactuurDatum.setCellValue(localDate.toString());
 
                     String factuurnummer = scnWord.next();
-                    cell = row.createCell(FACTUUR_NUMMER.getCell());
-                    cell.setCellType(CellType.NUMERIC);
-                    cell.setCellValue(factuurnummer);
+                    XSSFCell cellFacturNummer = row.createCell(FACTUUR_NUMMER.getCell());
+                    cellFacturNummer.setCellType(CellType.NUMERIC);
+                    cellFacturNummer.setCellValue(factuurnummer);
                     rowPosition++;
+                    row = sheet.createRow(rowPosition);
+                    continue;
                 }
             }
             wb.write(fileOut);
             fileOut.flush();
+            System.out.println(excelFileName + " has been created");
         } catch (Exception e) {
             e.printStackTrace();
         }
