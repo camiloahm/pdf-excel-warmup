@@ -61,7 +61,7 @@
                     <programs>
                         <program>
                             <mainClass>wendy.PDFMerger</mainClass>
-                            <id>wendyApp</id>
+                            <id>WnedyMagicTool</id>
                         </program>
                     </programs>
                 </configuration>
