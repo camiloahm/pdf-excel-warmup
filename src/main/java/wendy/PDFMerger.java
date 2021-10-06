@@ -108,7 +108,7 @@ public class PDFMerger implements Callable<Integer> {
                         String totalInclBTW = scnWord.next();
                         totalInclBTW = totalInclBTW.contains("€") ? totalInclBTW.replace("€", "") : totalInclBTW;
                         XSSFCell cell = row.createCell(TOTAL_INCL_BTW.getCell());
-                        cell.setCellType(CellType.NUMERIC);
+                        cell.setCellType(CellType.STRING);
                         cell.setCellValue(totalInclBTW);
                     }
                     continue;
@@ -181,6 +181,8 @@ public class PDFMerger implements Callable<Integer> {
                         cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(teBetalen);
                     }
+                    rowPosition++;
+                    row = sheet.createRow(rowPosition);
                     continue;
                 }
 
@@ -207,14 +209,15 @@ public class PDFMerger implements Callable<Integer> {
                     if (!factuurDatum.trim().equals("")) {
                         if (scnWord.hasNext()) {
                             factuurnummer = scnWord.next();
+                            while (factuurnummer.equals("") && scnWord.hasNext()) {
+                                factuurnummer = scnWord.next();
+                            }
                         }
                     }
 
                     XSSFCell cellFacturNummer = row.createCell(FACTUUR_NUMMER.getCell());
                     cellFacturNummer.setCellType(CellType.NUMERIC);
                     cellFacturNummer.setCellValue(factuurnummer);
-                    rowPosition++;
-                    row = sheet.createRow(rowPosition);
                     continue;
                 }
             }
